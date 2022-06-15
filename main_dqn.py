@@ -6,8 +6,6 @@ import random
 import numpy as np 
 import time
 import matplotlib as mpl
-
-from main_double import ENCODER_USE_RESNET
 mpl.use('Agg')
 from matplotlib import pyplot as plt
 
@@ -90,7 +88,17 @@ def optimize_model(representAgent:BisimAgent):
         param.grad.data.clamp_(-1, 1)
     optimizer.step()
 
-    representAgent.update(state_batch, action_batch, reward_batch, zero_final_next_states)
+    transitions_2 = memory.sample(BATCH_SIZE)
+    batch_2 = Transition(*zip(*transitions_2))
+    actions_2 = tuple((map(lambda a: torch.tensor([[a]], device='cuda'), batch_2.action)))
+    rewards_2 = tuple((map(lambda r: torch.tensor([r], device='cuda'), batch_2.reward)))
+    
+    state_batch_2 = torch.cat(batch_2.state).to('cuda')
+    action_batch_2 = torch.cat(actions_2)
+    reward_batch_2 = torch.cat(rewards_2)
+
+    representAgent.update(state_batch, action_batch, reward_batch, zero_final_next_states,
+    state_batch_2, action_batch_2, reward_batch_2)
 
 def get_state(obs):
     state = np.array(obs)

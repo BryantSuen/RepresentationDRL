@@ -2,7 +2,6 @@ import copy
 from collections import namedtuple
 from itertools import count
 import math
-from pickle import TRUE
 import random
 import numpy as np
 import time
@@ -90,7 +89,17 @@ def optimize_model(representAgent:BisimAgent):
         param.grad.data.clamp_(-1, 1)
     optimizer.step()
 
-    representAgent.update(state_batch, action_batch, reward_batch, zero_final_next_states)
+    transitions_2 = memory.sample(BATCH_SIZE)
+    batch_2 = Transition(*zip(*transitions_2))
+    actions_2 = tuple((map(lambda a: torch.tensor([[a]], device='cuda'), batch_2.action)))
+    rewards_2 = tuple((map(lambda r: torch.tensor([r], device='cuda'), batch_2.reward)))
+    
+    state_batch_2 = torch.cat(batch_2.state).to('cuda')
+    action_batch_2 = torch.cat(actions_2)
+    reward_batch_2 = torch.cat(rewards_2)
+
+    representAgent.update(state_batch, action_batch, reward_batch, zero_final_next_states,
+    state_batch_2, action_batch_2, reward_batch_2)
     '''else:
         state_action_values = target_net(state_batch).gather(1, action_batch)
         next_state_values = torch.zeros(BATCH_SIZE, device=device)

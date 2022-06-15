@@ -64,40 +64,35 @@ class BisimAgent(object):
         total_loss = loss + reward_loss
         return total_loss
 
-    def calEncoderLoss(self, state, action, reward):
+    def calEncoderLoss(self, state, action, reward, state_2, action_2, reward_2):
         '''
         '''
         state = state.to(self.device)
         action = action.to(self.device)
         reward = reward.to(self.device)
 
-        h = self.encoder(state)            
+        state_2 = state_2.to(self.device)
+        action_2 = action_2.to(self.device)
+        reward_2 = reward_2.to(self.device)
 
-        # Sample random states across episodes at random
-        batch_size = state.size(0)
-        perm = np.random.permutation(batch_size)
-        h2 = h[perm]
+        h = self.encoder(state)      
+        h_2 = self.encoder(state_2)      
 
         with torch.no_grad():
             # action, _, _, _ = self.actor(obs, compute_pi=False, compute_log_pi=False)
             pred_next_latent_mu1, pred_next_latent_sigma1 = self.transition_model(torch.cat([h, action], dim=1))
+            pred_next_latent_mu2, pred_next_latent_sigma2 = self.transition_model(torch.cat([h_2, action_2], dim=1))
             # reward = self.reward_decoder(pred_next_latent_mu1)
-            reward2 = reward[perm]
+            
         if pred_next_latent_sigma1 is None:
             pred_next_latent_sigma1 = torch.zeros_like(pred_next_latent_mu1)
-
-        if pred_next_latent_mu1.ndim == 2:  # shape (B, Z), no ensemble
-            pred_next_latent_mu2 = pred_next_latent_mu1[perm]
-            pred_next_latent_sigma2 = pred_next_latent_sigma1[perm]
-
-        elif pred_next_latent_mu1.ndim == 3:  # shape (B, E, Z), using an ensemble
-            pred_next_latent_mu2 = pred_next_latent_mu1[:, perm]
-            pred_next_latent_sigma2 = pred_next_latent_sigma1[:, perm]
-        else:
-            raise NotImplementedError
         
-        z_dist = F.smooth_l1_loss(h, h2, reduction='none')
-        r_dist = F.smooth_l1_loss(reward, reward2, reduction='none').unsqueeze(1)
+        if pred_next_latent_sigma2 is None:
+            pred_next_latent_sigma2 = torch.zeros_like(pred_next_latent_mu2)
+
+        
+        z_dist = F.smooth_l1_loss(h, h_2, reduction='none')
+        r_dist = F.smooth_l1_loss(reward, reward_2, reduction='none').unsqueeze(1)
 
         transition_dist = torch.sqrt(
             (pred_next_latent_mu1 - pred_next_latent_mu2).pow(2) +
@@ -111,13 +106,15 @@ class BisimAgent(object):
 
         return loss
 
-    def update(self, state, action, reward, next_state):
+    def update(self, state, action, reward, next_state,
+                state_2, action_2, reward_2):
 
         # TODO: here, action may be converted to onehot (done).
         action_onehot = torch.zeros([action.size(0), self.n_actions]).to(self.device).scatter_(1, action, 1.)
+        action_2_onehot = torch.zeros([action_2.size(0), self.n_actions]).to(self.device).scatter_(1, action_2, 1.)
 
         transistionModelLoss = self.calTransistionModelLoss(state, action_onehot, next_state, reward)
-        encoderLoss = self.calEncoderLoss(state, action_onehot, reward)
+        encoderLoss = self.calEncoderLoss(state, action_onehot, reward, state_2, action_2_onehot, reward_2)
         totalLoss = self.bisim_coef * encoderLoss + transistionModelLoss
 
         self.encoder_optimizer.zero_grad()
