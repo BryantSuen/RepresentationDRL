@@ -1,5 +1,17 @@
+from turtle import forward
 import torch
 import torch.nn as nn
+from bisim.basic_models import *
+
+class ResnetEncoder(nn.Module):
+    def __init__(self, feature_dim=256):
+        super().__init__()
+        self.model = ResNet18(num_classes=feature_dim)
+
+    def forward(self, obs):
+        out = self.model(obs)
+        return out
+
 
 class PixelEncoder(nn.Module):
     """Convolutional encoder of pixels observations."""

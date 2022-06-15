@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 import os
 
-from bisim.encoder import PixelEncoder
+from bisim.encoder import *
 from bisim.transistion_model import TransistionModel
 
 class BisimAgent(object):
@@ -12,8 +12,13 @@ class BisimAgent(object):
                 encoder_lr=1e-3, encoder_weight_decay=0., decoder_lr=1e-3, decoder_weight_decay=0., 
                 encoder_feature_dim=256, encoder_n_layers=2, 
                 t_model_layer_width=5, 
-                decoder_layer_size=512):
-        self.encoder = PixelEncoder(obs_shape, feature_dim=encoder_feature_dim, num_layers=encoder_n_layers).to(device)
+                decoder_layer_size=512,
+                useResNet=False):
+        if(useResNet): 
+            self.encoder = ResnetEncoder(feature_dim=encoder_feature_dim).to(device)
+        else:
+            self.encoder = PixelEncoder(obs_shape, feature_dim=encoder_feature_dim, num_layers=encoder_n_layers).to(device)
+        
         self.transition_model = TransistionModel(n_actions=n_actions, encoder_feature_dim=encoder_feature_dim, layer_width=t_model_layer_width).to(device)
         self.reward_decoder = nn.Sequential(
             nn.Linear(encoder_feature_dim, decoder_layer_size),

@@ -220,6 +220,8 @@ if __name__ == '__main__':
     POLICY_NET_LAYERS = 2 # default:2
     POLICY_NET_FC_SIZE = 512
 
+    ENCODER_USE_RESNET=True
+
     # create environment
     # env = gym.make("SpaceInvaders-v0")
     env = gym.make("Enduro-v0")
@@ -233,7 +235,8 @@ if __name__ == '__main__':
     decoder_lr=DECODER_LR, decoder_weight_decay=DECODER_WEIGHT_DECAY,
     encoder_feature_dim=ENCODER_FEATURE_DIM, encoder_n_layers=ENCODER_N_LAYERS,
     t_model_layer_width=TRANSISTION_MODEL_LAYER_WIDTH,
-    decoder_layer_size=DECODER_LAYER_SIZE)
+    decoder_layer_size=DECODER_LAYER_SIZE,
+    useResNet=ENCODER_USE_RESNET)
 
     # create networks
     policy_net = MLP(input_size=ENCODER_FEATURE_DIM, n_layers=POLICY_NET_LAYERS, fc_size=POLICY_NET_FC_SIZE, n_actions=n_actions).to(device)
