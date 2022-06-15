@@ -94,6 +94,7 @@ def get_state(obs):
     state = np.array(obs)
     state = state.transpose((2, 0, 1))
     state = torch.from_numpy(state)
+    state = state / 255
     state = state.unsqueeze(0)
     return state
 
