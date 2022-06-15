@@ -23,6 +23,7 @@ class BisimAgent(object):
 
         self.discount = discount
         self.bisim_coef = bisim_coef
+        self.n_actions = n_actions
 
         self.device = device
 
@@ -108,7 +109,7 @@ class BisimAgent(object):
     def update(self, state, action, reward, next_state):
 
         # TODO: here, action may be converted to onehot (done).
-        action_onehot = torch.zeros([action.size(0), 6]).to(self.device).scatter_(1, action, 1.)
+        action_onehot = torch.zeros([action.size(0), self.n_actions]).to(self.device).scatter_(1, action, 1.)
 
         transistionModelLoss = self.calTransistionModelLoss(state, action_onehot, next_state, reward)
         encoderLoss = self.calEncoderLoss(state, action_onehot, reward)

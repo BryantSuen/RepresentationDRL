@@ -221,11 +221,13 @@ if __name__ == '__main__':
     POLICY_NET_FC_SIZE = 512
 
     # create environment
-    env = gym.make("SpaceInvaders-v0")
-    #env = gym.make('PongNoFrameskip-v4')
+    # env = gym.make("SpaceInvaders-v0")
+    env = gym.make("Enduro-v0")
+    n_actions = env.action_space.n
+
     env = make_env(env, stack_frames=True, episodic_life=False, clip_rewards=False, scale=False)
 
-    bisim = BisimAgent([4, 84, 84], 6, 
+    bisim = BisimAgent([4, 84, 84], n_actions, 
     discount=DISCOUNT, bisim_coef=BISIM_COEF, 
     encoder_lr=ENCODER_LR, encoder_weight_decay=ENCODER_WEIGHT_DECAY,
     decoder_lr=DECODER_LR, decoder_weight_decay=DECODER_WEIGHT_DECAY,
@@ -234,8 +236,8 @@ if __name__ == '__main__':
     decoder_layer_size=DECODER_LAYER_SIZE)
 
     # create networks
-    policy_net = MLP(input_size=ENCODER_FEATURE_DIM, n_layers=POLICY_NET_LAYERS, fc_size=POLICY_NET_FC_SIZE).to(device)
-    target_net = MLP(input_size=ENCODER_FEATURE_DIM, n_layers=POLICY_NET_LAYERS, fc_size=POLICY_NET_FC_SIZE).to(device)
+    policy_net = MLP(input_size=ENCODER_FEATURE_DIM, n_layers=POLICY_NET_LAYERS, fc_size=POLICY_NET_FC_SIZE, n_actions=n_actions).to(device)
+    target_net = MLP(input_size=ENCODER_FEATURE_DIM, n_layers=POLICY_NET_LAYERS, fc_size=POLICY_NET_FC_SIZE, n_actions=n_actions).to(device)
     target_net.load_state_dict(policy_net.state_dict())
 
     # setup optimizer
