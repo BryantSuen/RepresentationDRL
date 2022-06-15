@@ -130,4 +130,7 @@ dmypy.json
 
 
 # results
-results/
+results/bisim_models/*
+results/images/*
+results/models/*
+results/arrays/*
