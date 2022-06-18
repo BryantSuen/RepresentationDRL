@@ -218,12 +218,12 @@ if __name__ == '__main__':
     RENDER = False
     lr = 1e-4
     INITIAL_MEMORY = 1000
-    MEMORY_SIZE = 1000000
-    # MEMORY_SIZE = 10000
-    # N_EPISODE = 200
-    N_EPISODE = 20000
-    # N_EVAL = 40
-    N_EVAL = 400
+    # MEMORY_SIZE = 1000000
+    MEMORY_SIZE = 10000
+    N_EPISODE = 500
+    # N_EPISODE = 20000
+    N_EVAL = 40
+    # N_EVAL = 400
 
     # hyperparameters for bisim
     DISCOUNT = 0.99 # 0.99
