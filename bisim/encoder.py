@@ -6,7 +6,8 @@ from bisim.basic_models import *
 class ResnetEncoder(nn.Module):
     def __init__(self, feature_dim=256):
         super().__init__()
-        self.model = ResNet18(num_classes=feature_dim)
+        # self.model = ResNet18(num_classes=feature_dim)
+        self.model = ResNetBlock(h= 84, w = 84, num_classes=feature_dim)
 
     def forward(self, obs):
         out = self.model(obs)
