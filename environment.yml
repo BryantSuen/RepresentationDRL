@@ -1,0 +1,11 @@
+name: BisimDQN
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - pytorch
+  - torchvision
+  - cudatoolkit=11.4
+  - numpy
+  - matplotlib
+  - gym=0.10.9
