@@ -86,3 +86,5 @@ Two Strategy are implemented in encoder optimization, Permutation (origin paper)
 git checkout main
 git checkout noPermute
 ```
+
+Thanks for the base code of assignment 2 from [XuZhaoyi](https://github.com/XuZhaoyi).
